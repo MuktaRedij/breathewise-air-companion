@@ -1,23 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 
-// The home route ships no og:image, so serve-time hosting can inject the
-// project's social preview (explicit og:image or latest screenshot).
-export const Route = createFileRoute("/")({
-  component: Index,
-});
+import { HomeScreen } from "@/features/home/home-screen";
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
-function Index() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
-}
+export const Route = createFileRoute("/")({
+  component: HomeScreen,
+  head: () => ({
+    meta: [
+      { title: "BreatheWise — Breathe better, live smarter" },
+      { name: "description", content: "Air-quality insights, practical daily choices, and neighborhood action for cleaner communities." },
+      { property: "og:title", content: "BreatheWise — Breathe better, live smarter" },
+      { property: "og:description", content: "Air-quality insights, practical daily choices, and neighborhood action for cleaner communities." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
+});

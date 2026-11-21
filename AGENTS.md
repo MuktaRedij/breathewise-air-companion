@@ -28,3 +28,6 @@ use the editor.
   own key and store it in Secrets.
 - **Secrets.** Lovable manages them. Do not put secret values in the repo.
 <!-- LOVABLE:END -->
+
+## Project rules
+- Keep route definitions in `src/routes/`, domain-specific presentation and demo fixtures in `src/features/`, and reusable layout controls in `src/components/`; this keeps pages thin and lets later air-quality features share consistent behavior.
