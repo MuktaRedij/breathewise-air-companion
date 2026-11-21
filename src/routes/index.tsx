@@ -7,9 +7,17 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "BreatheWise — Breathe better, live smarter" },
-      { name: "description", content: "Air-quality insights, practical daily choices, and neighborhood action for cleaner communities." },
+      {
+        name: "description",
+        content:
+          "Air-quality insights, practical daily choices, and neighborhood action for cleaner communities.",
+      },
       { property: "og:title", content: "BreatheWise — Breathe better, live smarter" },
-      { property: "og:description", content: "Air-quality insights, practical daily choices, and neighborhood action for cleaner communities." },
+      {
+        property: "og:description",
+        content:
+          "Air-quality insights, practical daily choices, and neighborhood action for cleaner communities.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],

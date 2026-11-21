@@ -8,9 +8,17 @@ export const Route = createFileRoute("/dashboard")({
   head: () => ({
     meta: [
       { title: "Air Quality Dashboard — BreatheWise" },
-      { name: "description", content: "Review sample air-quality readings, pollutant levels, forecasts, and practical daily actions in BreatheWise." },
+      {
+        name: "description",
+        content:
+          "Review sample air-quality readings, pollutant levels, forecasts, and practical daily actions in BreatheWise.",
+      },
       { property: "og:title", content: "Air Quality Dashboard — BreatheWise" },
-      { property: "og:description", content: "Review sample air-quality readings, pollutant levels, forecasts, and practical daily actions in BreatheWise." },
+      {
+        property: "og:description",
+        content:
+          "Review sample air-quality readings, pollutant levels, forecasts, and practical daily actions in BreatheWise.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -18,5 +26,9 @@ export const Route = createFileRoute("/dashboard")({
 });
 
 function DashboardRoute() {
-  return <BreatheWiseAppShell><AirQualityDashboardScreen /></BreatheWiseAppShell>;
+  return (
+    <BreatheWiseAppShell>
+      <AirQualityDashboardScreen />
+    </BreatheWiseAppShell>
+  );
 }

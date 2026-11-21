@@ -8,9 +8,17 @@ export const Route = createFileRoute("/travel")({
   head: () => ({
     meta: [
       { title: "Green Travel Advisor — BreatheWise" },
-      { name: "description", content: "Compare walking, cycling, public transit, metro, carpooling, and driving with transparent emissions estimates." },
+      {
+        name: "description",
+        content:
+          "Compare walking, cycling, public transit, metro, carpooling, and driving with transparent emissions estimates.",
+      },
       { property: "og:title", content: "Green Travel Advisor — BreatheWise" },
-      { property: "og:description", content: "Compare walking, cycling, public transit, metro, carpooling, and driving with transparent emissions estimates." },
+      {
+        property: "og:description",
+        content:
+          "Compare walking, cycling, public transit, metro, carpooling, and driving with transparent emissions estimates.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -18,5 +26,9 @@ export const Route = createFileRoute("/travel")({
 });
 
 function TravelRoute() {
-  return <BreatheWiseAppShell><TravelScreen /></BreatheWiseAppShell>;
+  return (
+    <BreatheWiseAppShell>
+      <TravelScreen />
+    </BreatheWiseAppShell>
+  );
 }

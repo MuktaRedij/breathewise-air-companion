@@ -155,9 +155,21 @@ export const demoAirQuality: Record<CityKey, DemoAirQuality> = {
 };
 
 export const demoDailyActions = [
-  { id: "route", title: "Choose a greener route", detail: "A street away from heavy traffic can reduce roadside exposure." },
-  { id: "windows", title: "Check the outdoor reading first", detail: "Use a trusted local source before opening windows or planning exercise." },
-  { id: "transit", title: "Try one shared or transit trip", detail: "Small routine changes can lower estimated commute emissions." },
+  {
+    id: "route",
+    title: "Choose a greener route",
+    detail: "A street away from heavy traffic can reduce roadside exposure.",
+  },
+  {
+    id: "windows",
+    title: "Check the outdoor reading first",
+    detail: "Use a trusted local source before opening windows or planning exercise.",
+  },
+  {
+    id: "transit",
+    title: "Try one shared or transit trip",
+    detail: "Small routine changes can lower estimated commute emissions.",
+  },
 ];
 
 export function getAqiCategory(aqi: number): "Good" | "Moderate" | "High" {

@@ -8,9 +8,17 @@ export const Route = createFileRoute("/impact")({
   head: () => ({
     meta: [
       { title: "Sustainability Impact — BreatheWise" },
-      { name: "description", content: "Log sustainable commute actions and follow clearly labeled, assumption-based emissions estimates." },
+      {
+        name: "description",
+        content:
+          "Log sustainable commute actions and follow clearly labeled, assumption-based emissions estimates.",
+      },
       { property: "og:title", content: "Sustainability Impact — BreatheWise" },
-      { property: "og:description", content: "Log sustainable commute actions and follow clearly labeled, assumption-based emissions estimates." },
+      {
+        property: "og:description",
+        content:
+          "Log sustainable commute actions and follow clearly labeled, assumption-based emissions estimates.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -18,5 +26,9 @@ export const Route = createFileRoute("/impact")({
 });
 
 function ImpactRoute() {
-  return <BreatheWiseAppShell><ImpactScreen /></BreatheWiseAppShell>;
+  return (
+    <BreatheWiseAppShell>
+      <ImpactScreen />
+    </BreatheWiseAppShell>
+  );
 }

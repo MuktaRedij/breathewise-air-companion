@@ -8,9 +8,17 @@ export const Route = createFileRoute("/indoor-air")({
   head: () => ({
     meta: [
       { title: "Indoor Air Advice — BreatheWise" },
-      { name: "description", content: "Explore practical ventilation, purifier, and indoor pollution source-control ideas for your home." },
+      {
+        name: "description",
+        content:
+          "Explore practical ventilation, purifier, and indoor pollution source-control ideas for your home.",
+      },
       { property: "og:title", content: "Indoor Air Advice — BreatheWise" },
-      { property: "og:description", content: "Explore practical ventilation, purifier, and indoor pollution source-control ideas for your home." },
+      {
+        property: "og:description",
+        content:
+          "Explore practical ventilation, purifier, and indoor pollution source-control ideas for your home.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -18,5 +26,9 @@ export const Route = createFileRoute("/indoor-air")({
 });
 
 function IndoorAirRoute() {
-  return <BreatheWiseAppShell><IndoorAirScreen /></BreatheWiseAppShell>;
+  return (
+    <BreatheWiseAppShell>
+      <IndoorAirScreen />
+    </BreatheWiseAppShell>
+  );
 }

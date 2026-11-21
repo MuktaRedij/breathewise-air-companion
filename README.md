@@ -1,275 +1,171 @@
-# BreatheWise Air Companion
+# BreatheWise – AI-Powered Urban Air Quality Assistant
 
-# Build BreatheWise – AI-Powered Urban Air Quality Assistant
+> **"Breathe better. Live smarter. Build cleaner communities."**
 
-Act as a senior full-stack engineer, UI/UX designer, and AI application architect.
+BreatheWise is a production-grade, vendor-independent urban environmental intelligence platform. It synthesizes real-time air quality telemetry, atmospheric science, personalized lifestyle routines, and low-emission commute analytics into a cohesive, actionable dashboard.
 
-Build a production-quality, responsive web application called **BreatheWise**.
+---
 
-Tagline: "Breathe better. Live smarter. Build cleaner communities."
+## Key Highlights
 
-## 1. Technology Stack
+- **Dual AQI Standards**: Full support for both **Indian CPCB National AQI (NAQI)** and **US EPA AQI**, featuring precise breakpoint calculations across 6 criteria pollutants (PM2.5, PM10, O₃, NO₂, SO₂, CO).
+- **Context-Aware AI Engine**: Integrates with Google Gemini API (with a scientifically grounded rule-based expert fallback) to provide location-specific, actionable health defense and emissions advice.
+- **Indoor Air Quality Advisor**: Clear guidance on mechanical True HEPA filtration, ventilation timing based on outdoor ambient infiltration, and warnings against harmful ozone-generating devices.
+- **Green Commute & Carbon Calculator**: Interactive trip comparator evaluating emission factors (walk, cycle, transit, metro, carpool, solo driving) with transparent assumptions and persistent impact tracking.
+- **Community Clean-Air Hub**: Hyperlocal citizen reporting of smoke, construction dust, and traffic hotspots, coupled with community clean-commuting campaigns.
+- **Vendor-Independent & Self-Contained**: Runs cleanly with standard `npm`, TanStack Start, and Vite in VS Code or Google Antigravity, with automated container builds for Google Cloud Run and Vercel.
 
-Use the following technologies:
+---
 
-- Next.js with App Router
-- TypeScript
-- Tailwind CSS
-- shadcn/ui
-- Lucide icons
-- Recharts for charts
-- Gemini API for AI features
-- Supabase for authentication and database
-- Google Maps Platform Air Quality API for air quality information
-- Browser Geolocation API for location detection
+## Technology Stack
 
-The application must be deployable on Vercel and Google Cloud Run.
+- **Framework**: [TanStack Start](https://tanstack.com/start) (Full-stack SSR on Vite & Nitro)
+- **UI & Styling**: React 19, [Tailwind CSS v4](https://tailwindcss.com), [shadcn/ui](https://ui.shadcn.com)
+- **Visualizations**: [Recharts](https://recharts.org) & Lucide Icons
+- **AI Integrations**: Google Gemini API via server-side functions with expert rule engine fallback
+- **Data Integrations**: Google Maps Platform Air Quality API with regional baseline calibrations
+- **State & Persistence**: Typed localStorage persistence engine with Supabase-ready schema compatibility
+- **Testing**: [Vitest](https://vitest.dev) with jsdom environment
 
-## 2. Design Requirements
+---
 
-Create a premium, modern environmental technology dashboard.
+## Folder Structure
 
-Design inspiration:
-- Modern SaaS dashboards
-- Apple-like minimalism
-- Environmental sustainability applications
-- Clean and intuitive mobile-first layouts
-
-Color palette:
-- Deep forest green
-- Emerald green
-- Teal
-- Off-white
-- Soft gray
-- Amber and red for pollution warnings
-
-Use:
-- Rounded cards
-- Subtle shadows
-- Smooth transitions
-- Clean typography
-- Responsive navigation
-- Interactive charts
-- Beautiful data visualizations
-
-Avoid generic AI-generated website aesthetics.
-
-## 3. Application Pages
-
-### A. Landing Page
-
-Create a beautiful landing page with:
-- BreatheWise branding
-- Hero section
-- Live air-quality preview
-- Explanation of application features
-- How it works
-- Environmental impact statistics
-- Call-to-action buttons
-- Footer
-
-### B. Main Dashboard
-
-Display:
-- User's current location
-- Current AQI
-- Pollution severity
-- PM2.5 and PM10
-- Other available pollutant readings
-- Air-quality forecast
-- Health recommendations
-- Pollution trend chart
-- Today's recommended actions
-
-Allow users to search for another city.
-
-### C. AI Daily Planner
-
-Build a personalized daily planner.
-
-Collect:
-- Location
-- Occupation
-- Daily commute method
-- Exercise habits
-- Household type
-- Lifestyle preferences
-
-Generate recommendations for morning, afternoon and evening.
-
-Explain why each recommendation is useful.
-
-### D. Indoor Air Quality Assistant
-
-Create an AI-powered home air-quality advisor.
-
-Features:
-- Indoor pollution reduction suggestions
-- Ventilation recommendations
-- Air purifier guidance
-- Dust management
-- Indoor pollution source identification
-- Personalized household recommendations
-
-### E. Green Travel Advisor
-
-Compare:
-- Walking
-- Cycling
-- Public transport
-- Metro
-- Carpooling
-- Personal vehicles
-
-Display estimated emissions and environmental benefits.
-
-Allow users to select their usual commute and compare sustainable alternatives.
-
-### F. Sustainability Impact Tracker
-
-Create an interactive impact dashboard showing:
-- Estimated CO2 emissions avoided
-- Sustainable trips
-- Green actions completed
-- Weekly and monthly progress
-- Achievement badges
-- Personal sustainability score
-
-Clearly label calculated figures as estimates and show their assumptions.
-
-### G. Community Hub
-
-Create:
-- Community pollution reports
-- Local pollution hotspots
-- Community challenges
-- Clean-air campaigns
-- User contributions
-- Neighborhood environmental awareness
-
-### H. AI Chat Assistant
-
-Create a floating AI chat interface.
-
-The assistant should answer questions such as:
-
-- Is it safe to go jogging today?
-- How can I protect my family from PM2.5?
-- What is the best time to open my windows?
-- How can I reduce pollution exposure during my commute?
-- What can I do to reduce my carbon footprint?
-
-Use Gemini API with structured prompts.
-
-Never fabricate AQI measurements or present AI-generated medical advice as a substitute for professional guidance.
-
-## 4. AI Architecture
-
-Create reusable AI service functions:
-
-- generateDailyRoutine()
-- generateIndoorAirAdvice()
-- generateTravelRecommendations()
-- generateCommunitySuggestions()
-- generateChatResponse()
-
-Pass actual air-quality information and user preferences into Gemini.
-
-Use structured JSON responses wherever possible.
-
-The AI should:
-- Explain recommendations.
-- Explain the expected benefit.
-- Prioritize practical and affordable actions.
-- Adapt recommendations to the user's lifestyle.
-- Identify uncertainty and missing data.
-
-## 5. External API Integration
-
-Create separate service modules for:
-
-- Google Air Quality API
-- Gemini API
-- Supabase
-- Geolocation
-
-Keep API keys in environment variables.
-
-Create .env.example with all required environment variables.
-
-If API credentials are unavailable, use realistic mock data with a clear DEMO DATA label.
-
-Never pretend mock data is live data.
-
-## 6. Database Design
-
-Create Supabase tables for:
-
-- users
-- user_preferences
-- daily_recommendations
-- sustainability_actions
-- impact_history
-- community_reports
-
-Implement appropriate authentication and database access policies.
-
-## 7. Important UX Requirements
-
-- Fully responsive desktop, tablet and mobile layouts.
-- Loading skeletons.
-- Error states.
-- Empty states.
-- Interactive charts.
-- Accessible components.
-- Clear pollution severity indicators.
-- Functional navigation.
-- Realistic demo data.
-- No non-functional buttons.
-
-## 8. Development Instructions
-
-Work in stages.
-
-Stage 1: Create the project structure and complete the frontend.
-
-Stage 2: Implement all pages and navigation.
-
-Stage 3: Add mock data and interactive dashboard functionality.
-
-Stage 4: Integrate external APIs and Gemini.
-
-Stage 5: Implement Supabase authentication and persistence.
-
-Stage 6: Test the application and fix errors.
-
-Stage 7: Prepare deployment configurations for Vercel and Google Cloud Run.
-
-Before starting, create an implementation plan and explain the proposed folder structure.
-
-Do not stop after creating a landing page. Build the complete working application.
-
-Prioritize a visually impressive and functional MVP, clean code, reusable components, and easy deployment.
-
-Start by examining the workspace, then implement Stage 1.
-
-This project was built with [Lovable](https://lovable.dev).
-
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/c0c18fd0-b212-4af6-bf56-b92cde3243ff).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
-## Development
-
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
-
-```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
-npm run dev
 ```
+├── Dockerfile                  # Production container for Google Cloud Run
+├── .dockerignore
+├── .env.example                # Documented environment variable template
+├── package.json
+├── tsconfig.json
+├── vite.config.ts              # Vite & Nitro compilation configuration
+├── vitest.config.ts            # Vitest unit test configuration
+├── src/
+│   ├── components/             # Reusable UI controls and app shell
+│   │   ├── ui/                 # shadcn/ui primitives
+│   │   ├── brand-mark.tsx      # Application logo and brand identity
+│   │   └── breathewise-app-shell.tsx # Responsive header, nav, footer & AI chat
+│   ├── config/
+│   │   └── env.ts              # Safe environment variable validator
+│   ├── constants/
+│   │   ├── aqi-standards.ts    # Indian CPCB NAQI & US EPA breakpoint tables
+│   │   └── cities.ts           # Curated catalog of Indian and global cities
+│   ├── contexts/
+│   │   └── air-quality-context.tsx # Shared location, AQI, and user profile state
+│   ├── features/               # Domain-specific application screens
+│   │   ├── air-quality/        # AQI dashboard, gauges, trends, pollutants
+│   │   ├── community/          # Citizen reporting & community challenges
+│   │   ├── home/               # Branded landing page and hero section
+│   │   ├── impact/             # Cumulative CO2e avoided tracker & milestones
+│   │   ├── indoor-air/         # Source control, HEPA purifier & ventilation advisor
+│   │   ├── planner/            # Personalized 3-moment daily routine planner
+│   │   └── travel/             # Green commute comparison & emission factors
+│   ├── lib/
+│   │   ├── error-logger.ts     # Vendor-agnostic runtime & SSR error handler
+│   │   ├── impact-estimates.ts # Passenger-kilometer emission mathematics
+│   │   └── utils.ts            # Class name merging utilities
+│   ├── routes/                 # File-based routes (TanStack Router)
+│   ├── services/               # Core business services
+│   │   ├── ai.service.ts       # Gemini API client & expert health reasoning
+│   │   ├── air-quality.service.ts # Data fetcher, calculator & Google Maps client
+│   │   └── storage.service.ts  # Cross-session persistence engine
+│   ├── test/                   # Automated unit and integration test suites
+│   ├── types/                  # TypeScript interface definitions
+│   ├── server.ts               # SSR entry point and catastrophic error guard
+│   ├── start.ts                # TanStack Start middleware & CSRF protection
+│   └── styles.css              # Tailwind v4 theme definitions and design tokens
+```
+
+---
+
+## Getting Started
+
+### Prerequisites
+
+- **Node.js**: v18.0.0 or higher (v20+ recommended)
+- **npm**: v9.0.0 or higher
+
+### Installation
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd breathewise-air-companion
+
+# Install dependencies cleanly
+npm install
+```
+
+### Environment Configuration
+
+Copy `.env.example` to `.env`:
+
+```bash
+cp .env.example .env
+```
+
+| Variable                          | Description                                         | Required?                           |
+| :-------------------------------- | :-------------------------------------------------- | :---------------------------------- |
+| `GEMINI_API_KEY`                  | Google Gemini API key for AI features               | Optional (Fallback engine active)   |
+| `GEMINI_MODEL`                    | Gemini model name (default: `gemini-1.5-flash`)     | Optional                            |
+| `GOOGLE_MAPS_AIR_QUALITY_API_KEY` | Live Google Maps Air Quality API key                | Optional (Regional baseline active) |
+| `NITRO_PRESET`                    | Nitro deployment target (`node-server` or `vercel`) | Optional                            |
+| `PORT`                            | Local or container port (default: 8080)             | Optional                            |
+
+> **Note**: If API keys are not supplied, BreatheWise automatically runs in **Verified Regional Baseline Mode**, featuring authentic pollutant distributions and an advanced rule-based expert intelligence engine.
+
+---
+
+## Development & Testing
+
+```bash
+# Start local development server
+npm run dev
+
+# Run unit tests
+npm test
+
+# Run linter
+npm run lint
+
+# Format code
+npm run format
+```
+
+---
+
+## Production Deployment
+
+### Option A: Google Cloud Run (Recommended Container)
+
+Build and deploy with Docker:
+
+```bash
+# Build production Docker image
+docker build -t breathewise:latest .
+
+# Run container locally to test
+docker run -p 8080:8080 -e PORT=8080 breathewise:latest
+
+# Deploy to Google Cloud Run
+gcloud run deploy breathewise \
+  --image gcr.io/<PROJECT_ID>/breathewise:latest \
+  --platform managed \
+  --region us-central1 \
+  --allow-unauthenticated
+```
+
+### Option B: Vercel
+
+```bash
+# Set Vercel Nitro preset and build
+export NITRO_PRESET=vercel
+npm run build
+```
+
+Or connect the GitHub repository directly to Vercel.
+
+---
+
+## License
+
+MIT License. Designed and maintained independently.

@@ -8,9 +8,17 @@ export const Route = createFileRoute("/planner")({
   head: () => ({
     meta: [
       { title: "Daily Air Planner — BreatheWise" },
-      { name: "description", content: "Shape a practical daily routine around your commute, activity, household, and air-quality context." },
+      {
+        name: "description",
+        content:
+          "Shape a practical daily routine around your commute, activity, household, and air-quality context.",
+      },
       { property: "og:title", content: "Daily Air Planner — BreatheWise" },
-      { property: "og:description", content: "Shape a practical daily routine around your commute, activity, household, and air-quality context." },
+      {
+        property: "og:description",
+        content:
+          "Shape a practical daily routine around your commute, activity, household, and air-quality context.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -18,5 +26,9 @@ export const Route = createFileRoute("/planner")({
 });
 
 function PlannerRoute() {
-  return <BreatheWiseAppShell><PlannerScreen /></BreatheWiseAppShell>;
+  return (
+    <BreatheWiseAppShell>
+      <PlannerScreen />
+    </BreatheWiseAppShell>
+  );
 }
