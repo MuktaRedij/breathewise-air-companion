@@ -50,11 +50,11 @@ describe("AI Service & Context-Aware Expert Fallback Engine", () => {
     expect(plan.city).toBe("New Delhi");
     expect(plan.aqi).toBe(284);
     expect(plan.moments).toHaveLength(3);
-    expect(plan.moments[0].time).toBe("Morning");
-    expect(plan.moments[1].time).toBe("Afternoon");
-    expect(plan.moments[2].time).toBe("Evening");
-    expect(plan.moments[0].personalExposureDefense).toBeDefined();
-    expect(plan.moments[0].ecologicalBenefit).toBeDefined();
+    expect(plan.moments[0]?.time).toBe("Morning");
+    expect(plan.moments[1]?.time).toBe("Afternoon");
+    expect(plan.moments[2]?.time).toBe("Evening");
+    expect(plan.moments[0]?.personalExposureDefense).toBeDefined();
+    expect(plan.moments[0]?.ecologicalBenefit).toBeDefined();
   });
 
   describe("Core Required Audit Questions", () => {

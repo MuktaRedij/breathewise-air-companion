@@ -1,3 +1,4 @@
+import type { AlertPreferences, ExposureEntry, PollutionAlert } from "../types/air-quality.types";
 import type { UserLifestyleProfile } from "../types/ai.types";
 
 export type LoggedActionItem = {
@@ -24,6 +25,9 @@ const STORAGE_KEYS = {
   LOGGED_ACTIONS: "breathewise_logged_actions",
   COMMUNITY_REPORTS: "breathewise_community_reports",
   CHALLENGE_JOINED: "breathewise_challenge_joined",
+  EXPOSURE_ENTRIES: "breathewise_exposure_entries",
+  ALERT_PREFERENCES: "breathewise_alert_preferences",
+  POLLUTION_ALERTS: "breathewise_pollution_alerts",
 };
 
 export class StorageService {
@@ -148,6 +152,83 @@ export class StorageService {
   public static setChallengeJoined(joined: boolean): void {
     if (!this.isBrowser()) return;
     localStorage.setItem(STORAGE_KEYS.CHALLENGE_JOINED, String(joined));
+  }
+
+  // Personal Exposure Entries
+  public static getExposureEntries(): ExposureEntry[] {
+    if (!this.isBrowser()) return [];
+    try {
+      const data = localStorage.getItem(STORAGE_KEYS.EXPOSURE_ENTRIES);
+      return data ? JSON.parse(data) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  public static addExposureEntry(entry: ExposureEntry): ExposureEntry[] {
+    const current = this.getExposureEntries();
+    const updated = [entry, ...current];
+    if (this.isBrowser()) {
+      try {
+        localStorage.setItem(STORAGE_KEYS.EXPOSURE_ENTRIES, JSON.stringify(updated));
+      } catch (e) {
+        console.warn("[StorageService] Failed to persist exposure entry:", e);
+      }
+    }
+    return updated;
+  }
+
+  public static clearExposureEntries(): void {
+    if (!this.isBrowser()) return;
+    localStorage.removeItem(STORAGE_KEYS.EXPOSURE_ENTRIES);
+  }
+
+  // Smart Pollution Alert Preferences & Alerts
+  public static getAlertPreferences(defaultCityId = "delhi"): AlertPreferences {
+    const fallback: AlertPreferences = {
+      thresholdAqi: 150,
+      preferredCityId: defaultCityId,
+      enablePoor: true,
+      enableVeryPoor: true,
+      enableSevere: true,
+      enableSuddenSpike: true,
+      browserNotificationsEnabled: false,
+    };
+    if (!this.isBrowser()) return fallback;
+    try {
+      const data = localStorage.getItem(STORAGE_KEYS.ALERT_PREFERENCES);
+      return data ? { ...fallback, ...JSON.parse(data) } : fallback;
+    } catch {
+      return fallback;
+    }
+  }
+
+  public static saveAlertPreferences(prefs: AlertPreferences): void {
+    if (!this.isBrowser()) return;
+    try {
+      localStorage.setItem(STORAGE_KEYS.ALERT_PREFERENCES, JSON.stringify(prefs));
+    } catch (e) {
+      console.warn("[StorageService] Failed to save alert preferences:", e);
+    }
+  }
+
+  public static getPollutionAlerts(): PollutionAlert[] {
+    if (!this.isBrowser()) return [];
+    try {
+      const data = localStorage.getItem(STORAGE_KEYS.POLLUTION_ALERTS);
+      return data ? JSON.parse(data) : [];
+    } catch {
+      return [];
+    }
+  }
+
+  public static savePollutionAlerts(alerts: PollutionAlert[]): void {
+    if (!this.isBrowser()) return;
+    try {
+      localStorage.setItem(STORAGE_KEYS.POLLUTION_ALERTS, JSON.stringify(alerts));
+    } catch (e) {
+      console.warn("[StorageService] Failed to save pollution alerts:", e);
+    }
   }
 
   private static getDefaultProfile(): UserLifestyleProfile {

@@ -185,7 +185,7 @@ export function getAqiLevel(aqi: number, standard: AqiStandard = "US_EPA"): AqiS
   const levels = getLevelsForStandard(standard);
   const clamped = Math.max(0, Math.min(500, Math.round(aqi)));
   const match = levels.find((lvl) => clamped >= lvl.min && clamped <= lvl.max);
-  return match || levels[levels.length - 1];
+  return match ?? (levels[levels.length - 1] as AqiScaleLevel);
 }
 
 export const POLLUTANT_METADATA: Record<

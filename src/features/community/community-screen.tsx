@@ -1,6 +1,15 @@
-import { useState, useEffect, type FormEvent } from "react";
-import { CheckCircle2, HeartHandshake, MapPin, Megaphone, Send, Users } from "lucide-react";
+import { useEffect, useState, type FormEvent } from "react";
+import {
+  AlertCircle,
+  CheckCircle2,
+  HeartHandshake,
+  MapPin,
+  Megaphone,
+  Send,
+  Users,
+} from "lucide-react";
 
+import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -37,15 +46,25 @@ const defaultCommunityReports: CommunityReportItem[] = [
   },
 ];
 
+const reportCategories = [
+  "All",
+  "Traffic Exhaust",
+  "Biomass / Smoke",
+  "Construction Dust",
+  "Industrial Emission",
+  "General Observation",
+];
+
 export function CommunityScreen() {
   const { currentAirData } = useAirQuality();
 
   const [reports, setReports] = useState<CommunityReportItem[]>([]);
+  const [filterCategory, setFilterCategory] = useState("All");
   const [category, setCategory] = useState("Traffic Exhaust");
   const [neighborhood, setNeighborhood] = useState("");
   const [note, setNote] = useState("");
   const [joined, setJoined] = useState(false);
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
   useEffect(() => {
     setReports(StorageService.getCommunityReports(defaultCommunityReports));
@@ -58,7 +77,10 @@ export function CommunityScreen() {
     const cleanNote = note.trim();
 
     if (!cleanNeighborhood || !cleanNote) {
-      setStatus("Please enter both a specific neighborhood and an observation.");
+      setStatus({
+        type: "error",
+        text: "Please enter both a neighborhood / cross street and an observation.",
+      });
       return;
     }
 
@@ -71,8 +93,11 @@ export function CommunityScreen() {
     setReports(updated);
     setNeighborhood("");
     setNote("");
-    setStatus("Your observation has been persisted and added to your community feed!");
-    setTimeout(() => setStatus(""), 4000);
+    setStatus({
+      type: "success",
+      text: "Your observation has been saved and added to the neighborhood feed.",
+    });
+    setTimeout(() => setStatus(null), 4000);
   };
 
   const toggleChallenge = () => {
@@ -81,65 +106,93 @@ export function CommunityScreen() {
     StorageService.setChallengeJoined(next);
   };
 
+  const visibleReports = reports.filter(
+    (r) => filterCategory === "All" || r.category === filterCategory,
+  );
+
   return (
     <div className="space-y-8 pb-12">
-      <header className="max-w-3xl border-b border-border pb-6">
-        <p className="text-sm font-semibold uppercase tracking-wide text-primary">
-          Community Clean Air Hub
-        </p>
-        <h1 className="font-display mt-2 text-3xl font-semibold sm:text-4xl">
-          Cleaner air is a neighborhood effort.
-        </h1>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-          Crowdsource hyper-local pollution observations, join clean commuting campaigns, and foster
-          neighborhood environmental awareness.
-        </p>
-      </header>
+      <PageHeader
+        eyebrow="Community Clean Air Hub"
+        title="Cleaner air is a neighborhood effort."
+        description="Crowdsource hyper-local pollution observations, join clean commuting campaigns, and build local awareness."
+        meta={
+          <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-0.5 text-[11px] font-semibold text-secondary-foreground">
+            <MapPin aria-hidden="true" className="size-3 text-primary" /> {currentAirData.city}
+          </span>
+        }
+      />
 
       {/* Grid */}
       <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
         {/* Reports Feed */}
-        <section aria-labelledby="reports-heading">
-          <div className="mb-4 flex items-end justify-between gap-4">
+        <section aria-labelledby="reports-heading" className="space-y-4">
+          <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                Crowdsourced Data
+                Crowdsourced Observations
               </p>
               <h2 id="reports-heading" className="font-display mt-1 text-xl font-semibold">
-                Neighborhood Observations ({reports.length})
+                Neighborhood Feed ({visibleReports.length})
               </h2>
             </div>
-            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-              <MapPin aria-hidden="true" className="size-3.5 text-primary" /> Active in{" "}
-              {currentAirData.city}
-            </span>
           </div>
 
-          <div className="divide-y divide-border border-y border-border">
-            {reports.map((report) => (
-              <article key={report.id} className="py-4 first:pt-0 last:pb-0">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <span className="rounded-md bg-secondary px-2.5 py-0.5 text-xs font-semibold text-primary">
-                    {report.category}
-                  </span>
-                  <span className="text-[11px] text-muted-foreground">{report.time}</span>
-                </div>
-                <p className="mt-2.5 inline-flex items-center gap-1.5 text-sm font-semibold text-foreground">
-                  <MapPin aria-hidden="true" className="size-3.5 text-primary" />{" "}
-                  {report.neighborhood}
-                </p>
-                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{report.note}</p>
-              </article>
+          {/* Category Filter Chips */}
+          <div className="flex flex-wrap gap-1.5">
+            {reportCategories.map((cat) => (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => setFilterCategory(cat)}
+                aria-pressed={filterCategory === cat}
+                className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
+                  filterCategory === cat
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border bg-card text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                {cat}
+              </button>
             ))}
           </div>
+
+          {visibleReports.length > 0 ? (
+            <div className="space-y-3">
+              {visibleReports.map((report) => (
+                <article
+                  key={report.id}
+                  className="rounded-xl border border-border bg-card p-4 shadow-2xs transition-colors hover:border-primary/35"
+                >
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="rounded-full bg-secondary px-2.5 py-0.5 text-xs font-semibold text-primary">
+                      {report.category}
+                    </span>
+                    <span className="text-[11px] text-muted-foreground">{report.time}</span>
+                  </div>
+                  <p className="mt-2.5 inline-flex items-center gap-1.5 text-sm font-semibold text-foreground">
+                    <MapPin aria-hidden="true" className="size-3.5 shrink-0 text-primary" />
+                    {report.neighborhood}
+                  </p>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                    {report.note}
+                  </p>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <p className="rounded-xl border border-dashed border-border py-10 text-center text-xs text-muted-foreground">
+              No observations found in the &ldquo;{filterCategory}&rdquo; category yet.
+            </p>
+          )}
         </section>
 
         {/* Sidebar: Submit Form & Challenge */}
         <div className="space-y-6">
-          {/* Submit Observation Form */}
           <form
             onSubmit={submitReport}
-            className="rounded-xl border border-border bg-card p-5 sm:p-6 shadow-xs"
+            noValidate
+            className="rounded-xl border border-border bg-card p-5 shadow-2xs sm:p-6"
           >
             <div className="flex items-center gap-3">
               <span className="flex size-9 items-center justify-center rounded-lg bg-secondary text-primary">
@@ -157,7 +210,7 @@ export function CommunityScreen() {
               <label className="grid gap-1.5 text-xs font-semibold text-foreground">
                 Category
                 <Select value={category} onValueChange={setCategory}>
-                  <SelectTrigger aria-label="Category">
+                  <SelectTrigger aria-label="Category" className="rounded-lg">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -175,9 +228,10 @@ export function CommunityScreen() {
                 <Input
                   value={neighborhood}
                   onChange={(e) => setNeighborhood(e.target.value)}
-                  placeholder={`e.g. Near Metro Station / Main Road in ${currentAirData.city}`}
+                  placeholder={`e.g. Near Metro Station in ${currentAirData.city}`}
                   maxLength={90}
-                  className="text-xs"
+                  aria-invalid={status?.type === "error" && !neighborhood.trim()}
+                  className="rounded-lg text-xs"
                 />
               </label>
 
@@ -188,27 +242,37 @@ export function CommunityScreen() {
                   onChange={(e) => setNote(e.target.value)}
                   placeholder="Factual observation: visible smoke, heavy soot, dust plume..."
                   maxLength={180}
-                  className="text-xs"
+                  aria-invalid={status?.type === "error" && !note.trim()}
+                  className="rounded-lg text-xs"
                 />
               </label>
 
-              <Button type="submit" className="w-full gap-2 text-xs h-9 mt-2">
+              <Button type="submit" className="mt-2 h-9 w-full gap-2 rounded-lg text-xs">
                 <Send aria-hidden="true" className="size-3.5" /> Submit to Neighborhood Feed
               </Button>
             </div>
 
-            {status && (
+            {status ? (
               <p
                 role="status"
-                className="mt-3 text-xs text-primary font-medium flex items-center gap-1.5"
+                className={`mt-3 flex items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-medium ${
+                  status.type === "error"
+                    ? "bg-destructive/10 text-destructive"
+                    : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                }`}
               >
-                <CheckCircle2 className="size-3.5" /> {status}
+                {status.type === "error" ? (
+                  <AlertCircle aria-hidden="true" className="size-3.5 shrink-0" />
+                ) : (
+                  <CheckCircle2 aria-hidden="true" className="size-3.5 shrink-0" />
+                )}
+                <span>{status.text}</span>
               </p>
-            )}
+            ) : null}
           </form>
 
           {/* Clean Air Campaign Card */}
-          <section className="rounded-xl bg-primary p-5 text-primary-foreground sm:p-6 shadow-xs">
+          <section className="rounded-xl bg-primary p-5 text-primary-foreground shadow-sm sm:p-6">
             <div className="flex items-center gap-3">
               <span className="flex size-9 items-center justify-center rounded-lg bg-primary-foreground/15">
                 <HeartHandshake aria-hidden="true" className="size-4" />
@@ -230,7 +294,8 @@ export function CommunityScreen() {
 
             <div className="mt-4 flex items-center justify-between gap-3 border-t border-primary-foreground/20 pt-3">
               <span className="inline-flex items-center gap-1.5 text-xs">
-                <Users aria-hidden="true" className="size-4" /> 148 Residents Joined
+                <Users aria-hidden="true" className="size-4" /> {joined ? 149 : 148} Residents
+                Joined
               </span>
               <Button
                 type="button"
@@ -238,7 +303,7 @@ export function CommunityScreen() {
                 size="sm"
                 onClick={toggleChallenge}
                 aria-pressed={joined}
-                className="h-8 text-xs font-semibold"
+                className="h-8 rounded-lg text-xs font-semibold"
               >
                 {joined ? "Joined ✓" : "Join Challenge"}
               </Button>

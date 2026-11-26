@@ -4,7 +4,7 @@ export function logRuntimeError(error: unknown, context: ErrorContext = {}): voi
   const message = describeThrown(error);
   const route = typeof window !== "undefined" ? window.location.pathname : "ssr";
 
-  if (process.env.NODE_ENV !== "production") {
+  if (process.env["NODE_ENV"] !== "production") {
     console.error("[BreatheWise Error]", { message, route, ...context, raw: error });
   } else {
     // Production telemetry hook (e.g. Sentry or CloudWatch) can be attached here

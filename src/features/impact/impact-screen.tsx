@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   BadgeCheck,
   Bike,
@@ -11,11 +11,15 @@ import {
   TrainFront,
   Trash2,
 } from "lucide-react";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
+import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Progress } from "@/components/ui/progress";
-import { StorageService, type LoggedActionItem } from "@/services/storage.service";
 import { estimateAvoidedCo2Kg } from "@/lib/impact-estimates";
+import { StorageService, type LoggedActionItem } from "@/services/storage.service";
 
 const defaultQuickActions = [
   {
@@ -41,6 +45,10 @@ const defaultQuickActions = [
   },
 ];
 
+const chartConfig = {
+  avoidedKg: { label: "CO₂e Avoided (kg)", color: "var(--chart-1)" },
+};
+
 export function ImpactScreen() {
   const [loggedItems, setLoggedItems] = useState<LoggedActionItem[]>([]);
   const [toastMessage, setToastMessage] = useState("");
@@ -54,6 +62,15 @@ export function ImpactScreen() {
 
   const weeklyProgress = Math.min((totalTrips / 5) * 100, 100);
   const monthlyProgress = Math.min((totalTrips / 20) * 100, 100);
+
+  const chartData = loggedItems
+    .slice(0, 7)
+    .reverse()
+    .map((item, idx) => ({
+      label: `#${idx + 1}`,
+      title: item.title,
+      avoidedKg: Number(item.avoidedKg.toFixed(2)),
+    }));
 
   const handleLogAction = (actionId: string, title: string, avoidedKg: number) => {
     const updated = StorageService.logImpactAction({
@@ -75,22 +92,15 @@ export function ImpactScreen() {
 
   return (
     <div className="space-y-8 pb-12">
-      <header className="max-w-3xl border-b border-border pb-6">
-        <p className="text-sm font-semibold uppercase tracking-wide text-primary">
-          Sustainability Impact
-        </p>
-        <h1 className="font-display mt-2 text-3xl font-semibold sm:text-4xl">
-          Small actions, measurable progress.
-        </h1>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-          Track verified low-emission commute choices and monitor your cumulative greenhouse gas
-          reductions with persistent storage.
-        </p>
-      </header>
+      <PageHeader
+        eyebrow="Sustainability Impact"
+        title="Small actions, measurable progress."
+        description="Track verified low-emission commute choices and monitor cumulative greenhouse gas reductions."
+      />
 
       {/* Summary Stats */}
       <section aria-label="Impact summary" className="grid gap-4 sm:grid-cols-3">
-        <article className="rounded-xl border border-border bg-card p-5 shadow-xs">
+        <article className="rounded-xl border border-border bg-card p-5 shadow-2xs">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Cumulative CO₂e Avoided
           </p>
@@ -101,7 +111,7 @@ export function ImpactScreen() {
           <p className="mt-1 text-[11px] text-muted-foreground">Persistent cross-session impact</p>
         </article>
 
-        <article className="rounded-xl border border-border bg-card p-5 shadow-xs">
+        <article className="rounded-xl border border-border bg-card p-5 shadow-2xs">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Sustainable Trips Logged
           </p>
@@ -111,7 +121,7 @@ export function ImpactScreen() {
           </p>
         </article>
 
-        <article className="rounded-xl border border-border bg-card p-5 shadow-xs">
+        <article className="rounded-xl border border-border bg-card p-5 shadow-2xs">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Sustainability Score
           </p>
@@ -126,8 +136,8 @@ export function ImpactScreen() {
       </section>
 
       {/* Goal Progress Bars */}
-      <section className="grid gap-6 border-y border-border py-7 lg:grid-cols-2">
-        <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
+      <section className="grid gap-5 lg:grid-cols-2">
+        <div className="rounded-xl border border-border bg-card p-5 shadow-2xs">
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -149,7 +159,7 @@ export function ImpactScreen() {
           </p>
         </div>
 
-        <div className="rounded-xl border border-border bg-card p-5 shadow-xs">
+        <div className="rounded-xl border border-border bg-card p-5 shadow-2xs">
           <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -174,7 +184,7 @@ export function ImpactScreen() {
 
       {/* Quick Log Cards */}
       <section aria-labelledby="action-log-heading">
-        <div className="mb-4 flex items-end justify-between">
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-2">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               One-Click Commute Log
@@ -183,26 +193,29 @@ export function ImpactScreen() {
               Log a Green Trip
             </h2>
           </div>
-          {toastMessage && (
-            <p className="text-xs text-emerald-600 font-semibold flex items-center gap-1.5 animate-fadeIn">
-              <CheckCircle2 className="size-3.5" /> {toastMessage}
+          {toastMessage ? (
+            <p
+              role="status"
+              className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300"
+            >
+              <CheckCircle2 aria-hidden="true" className="size-3.5" /> {toastMessage}
             </p>
-          )}
+          ) : null}
         </div>
 
         <div className="grid gap-4 lg:grid-cols-3">
           {defaultQuickActions.map(({ id, title, icon: Icon, avoidedKg, detail }) => (
             <article
               key={id}
-              className="flex flex-col justify-between gap-4 rounded-xl border border-border bg-card p-5 shadow-xs"
+              className="flex flex-col justify-between gap-4 rounded-xl border border-border bg-card p-5 shadow-2xs transition-colors hover:border-primary/35"
             >
               <div>
                 <span className="flex size-9 items-center justify-center rounded-lg bg-secondary text-primary">
                   <Icon aria-hidden="true" className="size-4" />
                 </span>
-                <h3 className="mt-3 font-semibold text-sm">{title}</h3>
+                <h3 className="mt-3 text-sm font-semibold">{title}</h3>
                 <p className="mt-1 text-xs text-muted-foreground">{detail}</p>
-                <p className="mt-2 text-xs font-medium text-primary">
+                <p className="mt-2 text-xs font-semibold text-primary">
                   ~{avoidedKg.toFixed(2)} kg CO₂e avoided per trip
                 </p>
               </div>
@@ -210,7 +223,7 @@ export function ImpactScreen() {
                 type="button"
                 variant="outline"
                 size="sm"
-                className="gap-1.5 text-xs h-9"
+                className="h-9 gap-1.5 rounded-lg text-xs"
                 onClick={() => handleLogAction(id, title, avoidedKg)}
               >
                 <Sparkles aria-hidden="true" className="size-3.5" /> Log This Action
@@ -220,49 +233,84 @@ export function ImpactScreen() {
         </div>
       </section>
 
+      {/* Historical Activity Chart (visible when actions exist) */}
+      {chartData.length > 0 ? (
+        <Card className="rounded-xl border-border shadow-2xs">
+          <CardHeader className="p-5 pb-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Activity Trajectory
+            </p>
+            <CardTitle className="font-display mt-1 text-lg">
+              Recent Logged Emissions Savings (kg CO₂e)
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-5 pt-2">
+            <ChartContainer config={chartConfig} className="aspect-auto h-[200px] w-full">
+              <BarChart data={chartData} margin={{ top: 10, right: 10, left: -16, bottom: 0 }}>
+                <CartesianGrid
+                  vertical={false}
+                  stroke="var(--color-border)"
+                  strokeDasharray="3 3"
+                />
+                <XAxis dataKey="label" tickLine={false} axisLine={false} fontSize={12} />
+                <YAxis tickLine={false} axisLine={false} width={38} fontSize={12} />
+                <ChartTooltip
+                  content={
+                    <ChartTooltipContent
+                      formatter={(val) => <span className="font-semibold">{val} kg CO₂e</span>}
+                    />
+                  }
+                />
+                <Bar dataKey="avoidedKg" fill="var(--color-primary)" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+      ) : null}
+
       {/* Action History Log */}
       <section
         aria-labelledby="history-heading"
-        className="rounded-xl border border-border bg-card p-5 sm:p-6 shadow-xs"
+        className="rounded-xl border border-border bg-card p-5 shadow-2xs sm:p-6"
       >
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <History className="size-4 text-primary" />
+            <History aria-hidden="true" className="size-4 text-primary" />
             <h2 id="history-heading" className="font-display text-lg font-semibold">
               Action History ({loggedItems.length})
             </h2>
           </div>
-          {loggedItems.length > 0 && (
+          {loggedItems.length > 0 ? (
             <Button
               type="button"
               variant="ghost"
               size="sm"
               onClick={handleClearHistory}
-              className="text-xs text-destructive hover:bg-destructive/10"
+              className="rounded-lg text-xs text-destructive hover:bg-destructive/10"
             >
-              <Trash2 className="size-3.5 mr-1" /> Clear History
+              <Trash2 aria-hidden="true" className="mr-1 size-3.5" /> Clear History
             </Button>
-          )}
+          ) : null}
         </div>
 
         {loggedItems.length > 0 ? (
           <div className="divide-y divide-border">
             {loggedItems.slice(0, 10).map((item) => (
-              <div key={item.id} className="flex items-center justify-between py-3 text-xs">
-                <div>
-                  <p className="font-semibold text-foreground">{item.title}</p>
+              <div key={item.id} className="flex items-center justify-between gap-4 py-3 text-xs">
+                <div className="min-w-0">
+                  <p className="truncate font-semibold text-foreground">{item.title}</p>
                   <p className="text-[11px] text-muted-foreground">
                     {new Date(item.timestamp).toLocaleString()}
                   </p>
                 </div>
-                <span className="font-bold text-primary tabular-nums">
+                <span className="shrink-0 font-bold tabular-nums text-primary">
                   +{item.avoidedKg.toFixed(2)} kg CO₂e
                 </span>
               </div>
             ))}
           </div>
         ) : (
-          <p className="text-xs text-muted-foreground py-6 text-center border border-dashed border-border rounded-lg">
+          <p className="rounded-xl border border-dashed border-border py-8 text-center text-xs text-muted-foreground">
             No green actions logged yet. Log a trip from the cards above or from the Green Travel
             Advisor.
           </p>
@@ -271,12 +319,15 @@ export function ImpactScreen() {
 
       {/* Milestones */}
       <section aria-labelledby="achievements-heading" className="border-t border-border pt-6">
-        <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+        <p
+          id="achievements-heading"
+          className="text-xs font-semibold uppercase tracking-wider text-muted-foreground"
+        >
           Milestones
         </p>
         <div className="mt-3 flex flex-wrap gap-3">
           <div
-            className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium ${
+            className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-medium ${
               totalTrips >= 1
                 ? "border-emerald-500/40 bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
                 : "border-border text-muted-foreground"
@@ -286,7 +337,7 @@ export function ImpactScreen() {
           </div>
 
           <div
-            className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium ${
+            className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-medium ${
               totalTrips >= 5
                 ? "border-emerald-500/40 bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
                 : "border-border text-muted-foreground"
@@ -296,7 +347,7 @@ export function ImpactScreen() {
           </div>
 
           <div
-            className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium ${
+            className={`inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-xs font-medium ${
               totalAvoidedKg >= 10
                 ? "border-emerald-500/40 bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300"
                 : "border-border text-muted-foreground"

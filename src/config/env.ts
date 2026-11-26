@@ -1,42 +1,51 @@
 /**
  * Environment configuration and safe validator.
- * Ensures private keys are never leaked to client bundles.
+ * Strictly keeps private API keys (GEMINI_API_KEY, GOOGLE_MAPS_AIR_QUALITY_API_KEY,
+ * SUPABASE_SERVICE_ROLE_KEY) server-side only via process.env.
+ * Never reads or exposes private secrets through VITE_ client variables.
  */
 
 export const env = {
-  // Server-only keys
+  // Server-only private keys (never exposed to client bundles)
   get geminiApiKey(): string | undefined {
-    return process.env.GEMINI_API_KEY || process.env.VITE_GEMINI_API_KEY;
+    return typeof process !== "undefined" ? process.env?.["GEMINI_API_KEY"] : undefined;
   },
   get geminiModel(): string {
-    return process.env.GEMINI_MODEL || "gemini-1.5-flash";
-  },
-  get googleMapsAirQualityApiKey(): string | undefined {
     return (
-      process.env.GOOGLE_MAPS_AIR_QUALITY_API_KEY ||
-      process.env.VITE_GOOGLE_MAPS_AIR_QUALITY_API_KEY
+      (typeof process !== "undefined" ? process.env?.["GEMINI_MODEL"] : undefined) ||
+      "gemini-1.5-flash"
     );
   },
+  get googleMapsAirQualityApiKey(): string | undefined {
+    return typeof process !== "undefined"
+      ? process.env?.["GOOGLE_MAPS_AIR_QUALITY_API_KEY"]
+      : undefined;
+  },
   get supabaseServiceKey(): string | undefined {
-    return process.env.SUPABASE_SERVICE_ROLE_KEY;
+    return typeof process !== "undefined" ? process.env?.["SUPABASE_SERVICE_ROLE_KEY"] : undefined;
   },
 
   // Public / client-safe keys
   get supabaseUrl(): string | undefined {
     return typeof process !== "undefined"
-      ? process.env.VITE_SUPABASE_URL
-      : (import.meta as unknown as { env?: Record<string, string> }).env?.VITE_SUPABASE_URL;
+      ? process.env?.["VITE_SUPABASE_URL"]
+      : (import.meta as unknown as { env?: Record<string, string> }).env?.["VITE_SUPABASE_URL"];
   },
   get supabaseAnonKey(): string | undefined {
     return typeof process !== "undefined"
-      ? process.env.VITE_SUPABASE_ANON_KEY
-      : (import.meta as unknown as { env?: Record<string, string> }).env?.VITE_SUPABASE_ANON_KEY;
+      ? process.env?.["VITE_SUPABASE_ANON_KEY"]
+      : (import.meta as unknown as { env?: Record<string, string> }).env?.[
+          "VITE_SUPABASE_ANON_KEY"
+        ];
+  },
+  get host(): string {
+    return (typeof process !== "undefined" ? process.env?.["HOST"] : undefined) || "0.0.0.0";
   },
   get port(): number {
-    return Number(process.env.PORT) || 8080;
+    return (typeof process !== "undefined" ? Number(process.env?.["PORT"]) : 0) || 8080;
   },
   get isProduction(): boolean {
-    return process.env.NODE_ENV === "production";
+    return typeof process !== "undefined" && process.env?.["NODE_ENV"] === "production";
   },
   get isAiConfigured(): boolean {
     return Boolean(this.geminiApiKey);

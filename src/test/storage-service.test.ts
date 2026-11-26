@@ -17,7 +17,7 @@ describe("Storage Service & Persistence", () => {
     });
 
     expect(updated.length).toBeGreaterThanOrEqual(1);
-    expect(updated[0].avoidedKg).toBe(0.87);
+    expect(updated[0]?.avoidedKg).toBe(0.87);
 
     const retrieved = StorageService.getLoggedActions();
     expect(retrieved.some((a) => a.actionId === "test-metro-shift")).toBe(true);

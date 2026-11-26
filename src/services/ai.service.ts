@@ -206,17 +206,69 @@ export class AiService {
 5. **Medical Vigilance:** Individuals with asthma, COPD, cardiovascular conditions, children, and the elderly should have emergency rescue medications accessible.`;
     }
 
+    // Domain 7: Forecasts & safest outdoor window
+    if (
+      q.includes("forecast") ||
+      q.includes("tomorrow") ||
+      q.includes("later today") ||
+      q.includes("outlook")
+    ) {
+      return `### Air Quality Forecast Context for ${air.city} (Current AQI: ${air.aqi})
+
+- **Diurnal Pattern:** Urban particulates typically peak during morning rush hours (7:00–9:30 AM) and evening temperature inversions (7:00–10:00 PM).
+- **Safest Outdoor Window:** Midday to early afternoon (**11:00 AM – 3:30 PM**) usually offers better vertical atmospheric dispersion.
+- **Full Hourly View:** Visit the **Forecast** page to inspect the 24-hour hourly AQI, PM2.5, and PM10 trajectory and see whether live 48–72 hour meteorological outlooks are connected.`;
+    }
+
+    // Domain 8: Personal Exposure Score
+    if (q.includes("exposure") && !q.includes("commute")) {
+      return `### Managing Your Personal Exposure in ${air.city} (AQI ${air.aqi})
+
+- **What Drives Exposure:** Your relative inhaled dose depends on ambient PM2.5, duration outdoors, and breathing rate (vigorous exercise increases inhalation 3× compared to rest).
+- **Track It:** Use the **Exposure Tracker** page to log your outdoor and commute minutes and view your 7-day relative exposure trend.
+- **Disclaimer:** Exposure scores are informational estimates, not medical diagnoses.`;
+    }
+
+    // Domain 9: Pollution Alerts
+    if (
+      q.includes("alert") ||
+      q.includes("notification") ||
+      q.includes("threshold") ||
+      q.includes("briefing")
+    ) {
+      return `### Smart Pollution Alerts for ${air.city}
+
+- **Current Status:** ${air.city} is at **AQI ${air.aqi} (${air.category})**.
+- **Configure Thresholds:** Open the **Alerts** page to set your custom AQI threshold (e.g., 100, 150, 200), enable Poor / Very Poor / Severe / Sudden Spike alerts, view your daily briefing, and optionally enable browser notifications.`;
+    }
+
+    // Domain 10: Clean Route Navigator
+    if (q.includes("route") || q.includes("walk") || q.includes("cycl") || q.includes("navigate")) {
+      return `### Clean Route Guidance for ${air.city} (AQI ${air.aqi})
+
+- **Corridor Strategy:** Choosing park paths or side streets **50–100 meters away** from arterial bus/truck corridors reduces roadside PM2.5 and NO₂ exposure compared to main roads, while keeping tailpipe emissions at **0 g CO₂e**.
+- **Compare Routes:** Open **Clean Routes** in the top navigation to compare Greenway vs. Arterial corridors for your walking or cycling trip.`;
+    }
+
+    // Domain 11: Community Reports
+    if (q.includes("community") || q.includes("report") || q.includes("neighborhood")) {
+      return `### Community Clean Air Hub (${air.city})
+
+- **Local Observations:** You can view and submit hyper-local observations (traffic idling, biomass burning, construction dust) on the **Community** page.
+- **Persistence:** Reports are saved locally so your neighborhood observations persist across refreshes.`;
+    }
+
     // General fallback contextual response
     return `In **${air.city}**, current air quality is **${air.category}** with an AQI of **${air.aqi}** (${air.standard === "INDIA_CPCB" ? "CPCB NAQI" : "US EPA"} scale). Dominant pollutant: **${air.dominantPollutant}**.
 
 **Health Context:** ${air.healthSummary}
-**Everyday Guidance:** You can ask me specific questions such as:
+**Ask me about:**
 - *"Is it safe to go jogging today?"*
+- *"What is the air quality forecast for today?"*
 - *"How can I protect my family from PM2.5?"*
 - *"What is the best time to open my windows?"*
-- *"How can I reduce pollution exposure during my commute?"*
-- *"What are the best low-emission travel alternatives?"*
-- *"What should I do when AQI becomes hazardous?"*`;
+- *"Recommend a clean walking route or lower-exposure commute."*
+- *"How do I configure pollution alerts or check my exposure score?"*`;
   }
 
   /**

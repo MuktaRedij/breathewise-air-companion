@@ -29,11 +29,12 @@ FROM node:20-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
+ENV HOST=0.0.0.0
 ENV PORT=8080
 EXPOSE 8080
 
 # Copy compiled standalone output from builder
 COPY --from=builder /app/.output ./.output
 
-# Cloud Run injects PORT (default 8080)
+# Railway and Cloud Run inject PORT dynamically (Nitro listens on 0.0.0.0:$PORT)
 CMD ["node", ".output/server/index.mjs"]

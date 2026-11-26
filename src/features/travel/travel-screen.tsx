@@ -1,31 +1,89 @@
 import { useState } from "react";
 import {
+  AlertTriangle,
   Bike,
   BusFront,
   Car,
+  CheckCircle2,
   Footprints,
+  Info,
+  ShieldCheck,
+  Sparkles,
   TrainFront,
   Users,
-  Sparkles,
-  Info,
-  CheckCircle2,
-  AlertTriangle,
 } from "lucide-react";
+import { Bar, BarChart, CartesianGrid, Cell, XAxis, YAxis } from "recharts";
 
+import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import { Input } from "@/components/ui/input";
 import { useAirQuality } from "@/contexts/air-quality-context";
-import { StorageService } from "@/services/storage.service";
 import { estimateAvoidedCo2Kg, estimatedGramsPerKm, type TravelMode } from "@/lib/impact-estimates";
+import { StorageService } from "@/services/storage.service";
 
-const modes: { id: TravelMode; label: string; icon: typeof Car; note: string; factor: number }[] = [
-  { id: "walk", label: "Walk", icon: Footprints, note: "0 g CO₂e/km", factor: 0 },
-  { id: "cycle", label: "Cycle", icon: Bike, note: "0 g CO₂e/km", factor: 0 },
-  { id: "transit", label: "Public bus", icon: BusFront, note: "90 g/passenger-km", factor: 90 },
-  { id: "metro", label: "Metro / Train", icon: TrainFront, note: "35 g/passenger-km", factor: 35 },
-  { id: "carpool", label: "Carpool", icon: Users, note: "95 g/passenger-km", factor: 95 },
-  { id: "car", label: "Solo car", icon: Car, note: "180 g CO₂e/km", factor: 180 },
+const modes: {
+  id: TravelMode;
+  label: string;
+  icon: typeof Car;
+  note: string;
+  factor: number;
+  exposureRisk: string;
+}[] = [
+  {
+    id: "walk",
+    label: "Walk",
+    icon: Footprints,
+    note: "0 g CO₂e/km",
+    factor: 0,
+    exposureRisk: "High if AQI > 150",
+  },
+  {
+    id: "cycle",
+    label: "Cycle",
+    icon: Bike,
+    note: "0 g CO₂e/km",
+    factor: 0,
+    exposureRisk: "High if AQI > 150",
+  },
+  {
+    id: "metro",
+    label: "Metro / Train",
+    icon: TrainFront,
+    note: "35 g/pkm",
+    factor: 35,
+    exposureRisk: "Low (enclosed)",
+  },
+  {
+    id: "transit",
+    label: "Public bus",
+    icon: BusFront,
+    note: "90 g/pkm",
+    factor: 90,
+    exposureRisk: "Moderate",
+  },
+  {
+    id: "carpool",
+    label: "Carpool",
+    icon: Users,
+    note: "95 g/pkm",
+    factor: 95,
+    exposureRisk: "Low (recirculate)",
+  },
+  {
+    id: "car",
+    label: "Solo car",
+    icon: Car,
+    note: "180 g CO₂e/km",
+    factor: 180,
+    exposureRisk: "Low (recirculate)",
+  },
 ];
+
+const chartConfig = {
+  kg: { label: "Weekly CO₂e (kg)", color: "var(--chart-1)" },
+};
 
 export function TravelScreen() {
   const { currentAirData, profile, updateProfile } = useAirQuality();
@@ -45,6 +103,12 @@ export function TravelScreen() {
     0,
     (estimatedGramsPerKm[alternative] * oneWayKm * tripsPerWeek) / 1000,
   );
+
+  const chartData = modes.map((m) => ({
+    mode: m.label,
+    id: m.id,
+    kg: Number(((m.factor * oneWayKm * tripsPerWeek) / 1000).toFixed(2)),
+  }));
 
   const handleDistanceChange = (val: string) => {
     setDistance(val);
@@ -71,39 +135,32 @@ export function TravelScreen() {
 
   return (
     <div className="space-y-8 pb-12">
-      <header className="max-w-3xl border-b border-border pb-6">
-        <p className="text-sm font-semibold uppercase tracking-wide text-primary">
-          Green Travel Advisor
-        </p>
-        <h1 className="font-display mt-2 text-3xl font-semibold sm:text-4xl">
-          A better trip can start close to home.
-        </h1>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-          Compare estimated passenger greenhouse gas emissions for your regular commute and evaluate
-          clean alternatives.
-        </p>
-      </header>
+      <PageHeader
+        eyebrow="Green Travel Advisor"
+        title="A better trip can start close to home."
+        description="Compare weekly passenger emissions and personal pollution exposure across commute modes."
+      />
 
       {/* Exposure vs Emission Callout */}
-      {isOutdoorUnsafe && isAltActiveOutdoor && (
-        <div className="flex items-start gap-3 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-xs">
-          <AlertTriangle className="size-4 shrink-0 text-amber-600 mt-0.5" />
+      {isOutdoorUnsafe && isAltActiveOutdoor ? (
+        <div className="flex items-start gap-3 rounded-xl border border-amber-500/35 bg-amber-500/10 p-4 text-xs leading-relaxed">
+          <AlertTriangle aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-amber-600" />
           <p>
             <strong className="text-amber-900 dark:text-amber-300">
-              Health Warning for Active Travel:{" "}
+              Personal Exposure Warning:{" "}
             </strong>
             Outdoor AQI in {currentAirData.city} is currently{" "}
             <strong>
               {currentAirData.aqi} ({currentAirData.category})
             </strong>
-            . While walking or cycling yields 0 g CO₂e, heavy breathing near traffic will
-            dramatically increase pulmonary particulate intake. When AQI is elevated, electrified
-            enclosed rail (Metro) or carpooling with cabin air on recirculate is the safer choice.
+            . Walking or cycling emits 0 g CO₂e, but heavy breathing near traffic elevates lung
+            particle intake. Prefer enclosed electrified rail (Metro) or carpooling with cabin air
+            on recirculate today.
           </p>
         </div>
-      )}
+      ) : null}
 
-      {/* Mode Selection */}
+      {/* Baseline Mode Selection */}
       <section aria-labelledby="usual-mode-heading">
         <div className="mb-4">
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -121,16 +178,20 @@ export function TravelScreen() {
               variant={usualMode === id ? "secondary" : "outline"}
               aria-pressed={usualMode === id}
               onClick={() => setUsualMode(id)}
-              className="h-auto min-h-24 flex-col items-start justify-between whitespace-normal p-3 text-left rounded-xl shadow-xs"
+              className={`h-auto min-h-24 flex-col items-start justify-between whitespace-normal rounded-xl p-3.5 text-left shadow-2xs ${
+                usualMode === id ? "border-primary/40 ring-1 ring-primary/20" : ""
+              }`}
             >
               <span className="flex w-full items-center justify-between">
-                <Icon aria-hidden="true" className="size-5" />
+                <Icon aria-hidden="true" className="size-5 text-primary" />
                 <span
-                  className={`size-2 rounded-full ${usualMode === id ? "bg-primary" : "bg-muted-foreground/30"}`}
+                  className={`size-2 rounded-full ${
+                    usualMode === id ? "bg-primary" : "bg-muted-foreground/30"
+                  }`}
                 />
               </span>
               <span>
-                <span className="block font-semibold text-xs">{label}</span>
+                <span className="block text-xs font-semibold">{label}</span>
                 <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground">
                   {note}
                 </span>
@@ -140,8 +201,8 @@ export function TravelScreen() {
         </div>
       </section>
 
-      {/* Adjust Inputs */}
-      <div className="grid gap-6 border-y border-border py-7 lg:grid-cols-[0.8fr_1.2fr]">
+      {/* Route Parameters & Alternative Selection */}
+      <div className="grid gap-6 rounded-xl border border-border bg-card p-5 shadow-2xs sm:p-6 lg:grid-cols-[0.8fr_1.2fr]">
         <section>
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Trip Parameters
@@ -159,7 +220,7 @@ export function TravelScreen() {
                   value={distance}
                   onChange={(e) => handleDistanceChange(e.target.value)}
                   aria-label="One-way distance in kilometers"
-                  className="pr-12 text-sm"
+                  className="rounded-lg pr-12 text-sm"
                 />
                 <span className="pointer-events-none absolute right-3 top-2.5 text-xs text-muted-foreground">
                   km
@@ -177,7 +238,7 @@ export function TravelScreen() {
                 value={trips}
                 onChange={(e) => setTrips(e.target.value)}
                 aria-label="One-way trips per week"
-                className="text-sm"
+                className="rounded-lg text-sm"
               />
             </label>
           </div>
@@ -203,22 +264,28 @@ export function TravelScreen() {
                   variant={alternative === id ? "default" : "outline"}
                   aria-pressed={alternative === id}
                   onClick={() => setAlternative(id)}
-                  className="gap-2 text-xs"
+                  className="h-9 gap-2 rounded-lg text-xs"
                 >
                   <Icon aria-hidden="true" className="size-4" /> {label}
                 </Button>
               ))}
           </div>
-          <p className="mt-3 text-xs text-muted-foreground">
-            Selecting an alternative recalculates total avoided greenhouse gases across your weekly
-            trips.
-          </p>
+          <div className="mt-4 flex items-start gap-2 rounded-lg bg-muted/45 p-3 text-xs text-muted-foreground">
+            <ShieldCheck aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-primary" />
+            <span>
+              Exposure check for <strong>{modes.find((m) => m.id === alternative)?.label}</strong>:{" "}
+              <strong className="text-foreground">
+                {modes.find((m) => m.id === alternative)?.exposureRisk}
+              </strong>
+              . Emission savings are calculated separately from personal air intake.
+            </span>
+          </div>
         </section>
       </div>
 
-      {/* Comparison Cards */}
-      <section aria-labelledby="comparison-heading">
-        <div className="mb-5">
+      {/* Comparison Cards + Bar Chart */}
+      <section aria-labelledby="comparison-heading" className="space-y-5">
+        <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Weekly Impact Analysis
           </p>
@@ -228,7 +295,7 @@ export function TravelScreen() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-3">
-          <article className="rounded-xl border border-border bg-card p-5 shadow-xs">
+          <article className="rounded-xl border border-border bg-card p-5 shadow-2xs">
             <p className="text-xs font-medium text-muted-foreground">
               Baseline: {modes.find((m) => m.id === usualMode)?.label}
             </p>
@@ -237,12 +304,11 @@ export function TravelScreen() {
               <span className="text-sm font-normal text-muted-foreground">kg CO₂e</span>
             </p>
             <p className="mt-1 text-[11px] text-muted-foreground">
-              Based on {oneWayKm} km × {tripsPerWeek} trips/week ({estimatedGramsPerKm[usualMode]}{" "}
-              g/km)
+              {oneWayKm} km × {tripsPerWeek} trips/week ({estimatedGramsPerKm[usualMode]} g/km)
             </p>
           </article>
 
-          <article className="rounded-xl border border-border bg-card p-5 shadow-xs">
+          <article className="rounded-xl border border-border bg-card p-5 shadow-2xs">
             <p className="text-xs font-medium text-muted-foreground">
               Alternative: {modes.find((m) => m.id === alternative)?.label}
             </p>
@@ -251,12 +317,11 @@ export function TravelScreen() {
               <span className="text-sm font-normal text-muted-foreground">kg CO₂e</span>
             </p>
             <p className="mt-1 text-[11px] text-muted-foreground">
-              Based on {oneWayKm} km × {tripsPerWeek} trips/week ({estimatedGramsPerKm[alternative]}{" "}
-              g/km)
+              {oneWayKm} km × {tripsPerWeek} trips/week ({estimatedGramsPerKm[alternative]} g/km)
             </p>
           </article>
 
-          <article className="rounded-xl border border-primary/25 bg-secondary/80 p-5 shadow-xs flex flex-col justify-between">
+          <article className="flex flex-col justify-between rounded-xl border border-primary/25 bg-secondary/70 p-5 shadow-2xs">
             <div>
               <p className="text-xs font-bold uppercase tracking-wider text-primary">
                 Avoided Emissions
@@ -266,37 +331,87 @@ export function TravelScreen() {
               </p>
               <p className="mt-1 text-[11px] text-muted-foreground">
                 {avoidedKg > 0
-                  ? "Cumulative emissions saved every week by switching mode."
+                  ? "Cumulative emissions avoided every week by switching mode."
                   : "No emission reduction for this shift."}
               </p>
             </div>
 
-            {avoidedKg > 0 && (
+            {avoidedKg > 0 ? (
               <Button
                 type="button"
                 size="sm"
                 onClick={handleLogShift}
-                className="mt-4 gap-1.5 w-full text-xs"
+                className="mt-4 w-full gap-1.5 rounded-lg text-xs"
               >
-                <Sparkles className="size-3.5" /> Log This Shift to My Impact
+                <Sparkles aria-hidden="true" className="size-3.5" /> Log This Shift to My Impact
               </Button>
-            )}
+            ) : null}
           </article>
         </div>
 
-        {loggedStatus && (
-          <p className="mt-3 text-xs text-primary font-medium flex items-center gap-1.5">
-            <CheckCircle2 className="size-3.5" /> {loggedStatus}
+        {loggedStatus ? (
+          <p
+            role="status"
+            className="flex items-center gap-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-300"
+          >
+            <CheckCircle2 aria-hidden="true" className="size-3.5" /> {loggedStatus}
           </p>
-        )}
+        ) : null}
 
-        <div className="mt-5 rounded-lg border border-border/80 bg-muted/20 p-3.5 text-[11px] text-muted-foreground flex items-start gap-2">
-          <Info className="size-4 shrink-0 mt-0.5 text-primary" />
+        {/* Emissions Comparison Chart */}
+        <Card className="rounded-xl border-border shadow-2xs">
+          <CardHeader className="p-5 pb-2">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Mode Comparison
+            </p>
+            <CardTitle className="font-display mt-1 text-lg">
+              Weekly CO₂e Emissions by Transport Mode ({oneWayKm} km × {tripsPerWeek} trips)
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="p-5 pt-2">
+            <ChartContainer config={chartConfig} className="aspect-auto h-[220px] w-full">
+              <BarChart data={chartData} margin={{ top: 10, right: 10, left: -12, bottom: 0 }}>
+                <CartesianGrid
+                  vertical={false}
+                  stroke="var(--color-border)"
+                  strokeDasharray="3 3"
+                />
+                <XAxis dataKey="mode" tickLine={false} axisLine={false} fontSize={12} />
+                <YAxis tickLine={false} axisLine={false} width={40} fontSize={12} />
+                <ChartTooltip
+                  content={
+                    <ChartTooltipContent
+                      formatter={(val) => <span className="font-semibold">{val} kg CO₂e</span>}
+                    />
+                  }
+                />
+                <Bar dataKey="kg" radius={[6, 6, 0, 0]}>
+                  {chartData.map((entry) => (
+                    <Cell
+                      key={entry.id}
+                      fill={
+                        entry.id === alternative
+                          ? "var(--color-primary)"
+                          : entry.id === usualMode
+                            ? "var(--color-chart-2)"
+                            : "var(--color-muted-foreground)"
+                      }
+                      fillOpacity={entry.id === alternative || entry.id === usualMode ? 0.95 : 0.35}
+                    />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ChartContainer>
+          </CardContent>
+        </Card>
+
+        <div className="flex items-start gap-2 rounded-xl border border-border/80 bg-muted/25 p-3.5 text-[11px] text-muted-foreground">
+          <Info aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-primary" />
           <span>
             <strong>Calculation Assumptions:</strong> Solo car: 180 g CO₂e/km; Public bus: 90
             g/passenger-km; Carpool (3 passengers): 95 g/passenger-km; Metro / Electric Rail: 35
             g/passenger-km; Walking &amp; Cycling: 0 g/km. Actual emissions depend on vehicle
-            efficiency, occupancy rate, and electricity grid emission factors.
+            efficiency, occupancy rate, and grid emission factors.
           </span>
         </div>
       </section>

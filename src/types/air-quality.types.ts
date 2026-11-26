@@ -36,6 +36,94 @@ export type ForecastPeriod = {
   note: string;
 };
 
+export type HourlyForecastPoint = {
+  hourOffset: number;
+  label: string;
+  aqi: number;
+  pm25: number;
+  pm10: number;
+  no2: number;
+  o3: number;
+  isMeasured: boolean;
+};
+
+export type MultiDayOutlook = {
+  day: string;
+  minAqi: number;
+  maxAqi: number;
+  summary: string;
+};
+
+export type AirQualityForecast = {
+  city: string;
+  standard: AqiStandard;
+  isLiveForecast: boolean;
+  dataSource: string;
+  generatedAt: string;
+  trendDirection: "improving" | "deteriorating" | "stable";
+  safestWindow: string;
+  aiExplanation: string;
+  isAiGenerated: boolean;
+  hourly24: HourlyForecastPoint[];
+  outlook48_72: MultiDayOutlook[] | null;
+  unavailableReason?: string;
+};
+
+export type ExposureEntry = {
+  id: string;
+  date: string;
+  city: string;
+  activityType: "light" | "moderate" | "vigorous";
+  commuteMode: "walk" | "cycle" | "transit" | "metro" | "carpool" | "car";
+  outdoorMinutes: number;
+  commuteMinutes: number;
+  aqiAtTime: number;
+  pm25AtTime: number;
+  estimatedScore: number;
+  exposureBand: "Low" | "Moderate" | "Elevated" | "High";
+  factors: string[];
+  timestamp: string;
+};
+
+export type AlertCategory = "Poor" | "Very Poor" | "Severe" | "Sudden Spike";
+
+export type AlertPreferences = {
+  thresholdAqi: number;
+  preferredCityId: string;
+  enablePoor: boolean;
+  enableVeryPoor: boolean;
+  enableSevere: boolean;
+  enableSuddenSpike: boolean;
+  browserNotificationsEnabled: boolean;
+};
+
+export type PollutionAlert = {
+  id: string;
+  eventKey: string;
+  category: AlertCategory;
+  title: string;
+  message: string;
+  city: string;
+  aqi: number;
+  timestamp: string;
+  read: boolean;
+};
+
+export type CleanRouteOption = {
+  id: string;
+  name: string;
+  corridorType: "greenway" | "mixed" | "arterial";
+  mode: "walk" | "cycle";
+  distanceKm: number;
+  durationMin: number;
+  relativeExposureLabel: "Lower" | "Moderate" | "Higher" | "Unavailable";
+  estimatedExposureScore: number | null;
+  tailpipeCo2Grams: number;
+  explanation: string;
+  isRecommended: boolean;
+  hasPollutionContext: boolean;
+};
+
 export type AirQualityData = {
   id: string;
   city: string;

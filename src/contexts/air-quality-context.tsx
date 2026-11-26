@@ -34,7 +34,7 @@ export function AirQualityProvider({ children }: { children: React.ReactNode }) 
   );
   const [currentAirData, setCurrentAirData] = useState<AirQualityData>(() => {
     // Initial sync baseline for SSR/hydration
-    const initialCity = CITIES_CATALOG.find((c) => c.id === selectedCityId) || CITIES_CATALOG[0];
+    const initialCity = (CITIES_CATALOG.find((c) => c.id === selectedCityId) || CITIES_CATALOG[0])!;
     return {
       id: initialCity.id,
       city: initialCity.city,
@@ -115,7 +115,7 @@ export function AirQualityProvider({ children }: { children: React.ReactNode }) 
         async (position) => {
           const { latitude, longitude } = position.coords;
           // Find closest city in catalog
-          let closestCity = CITIES_CATALOG[0];
+          let closestCity = CITIES_CATALOG[0]!;
           let minDistance = Infinity;
 
           for (const city of CITIES_CATALOG) {

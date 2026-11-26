@@ -1,16 +1,18 @@
-import { useState, useEffect, useCallback, type FormEvent } from "react";
+import { useCallback, useEffect, useState, type FormEvent } from "react";
 import {
   Check,
   Clock3,
-  Sun,
-  Moon,
-  Sunrise,
-  Sparkles,
-  MapPin,
-  ShieldAlert,
+  Home,
   Leaf,
+  MapPin,
+  Moon,
+  ShieldAlert,
+  Sparkles,
+  Sun,
+  Sunrise,
 } from "lucide-react";
 
+import { PageHeader } from "@/components/page-header";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -20,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAirQuality } from "@/contexts/air-quality-context";
 import { AiService } from "@/services/ai.service";
 import type { DailyRoutinePlan } from "@/types/ai.types";
@@ -37,6 +40,7 @@ export function PlannerScreen() {
 
   const [plan, setPlan] = useState<DailyRoutinePlan | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [savedNotice, setSavedNotice] = useState("");
 
   const fetchPlan = useCallback(async () => {
     setIsGenerating(true);
@@ -58,6 +62,8 @@ export function PlannerScreen() {
   const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     updateProfile(formState);
+    setSavedNotice("Preferences saved. Routine updated for your profile.");
+    setTimeout(() => setSavedNotice(""), 3500);
     fetchPlan();
   };
 
@@ -78,41 +84,22 @@ export function PlannerScreen() {
 
   return (
     <div className="space-y-8 pb-12">
-      <header className="max-w-3xl border-b border-border pb-6">
-        <p className="text-sm font-semibold uppercase tracking-wide text-primary">
-          Daily Routine Planner
-        </p>
-        <h1 className="font-display mt-2 text-3xl font-semibold sm:text-4xl">
-          A day that works with your air.
-        </h1>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-          Personalized daily routine dynamically harmonized with real ambient air quality in{" "}
-          <strong>{currentAirData.city}</strong> (AQI {currentAirData.aqi} ·{" "}
-          {currentAirData.category}).
-        </p>
-      </header>
-
-      {/* Context Badge */}
-      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-card p-4 text-xs shadow-xs">
-        <div className="flex items-center gap-2 text-foreground font-medium">
-          <MapPin className="size-4 text-primary" /> Active Location: {currentAirData.city},{" "}
-          {currentAirData.country}
-        </div>
-        <div className="flex items-center gap-3 text-muted-foreground">
-          <span>
-            AQI:{" "}
-            <strong>
-              {currentAirData.aqi} ({currentAirData.category})
-            </strong>
+      <PageHeader
+        eyebrow="AI Daily Routine Planner"
+        title="A day that works with your air."
+        description={`Personalized daily routine harmonized with ambient air quality in ${currentAirData.city} (AQI ${currentAirData.aqi} · ${currentAirData.category}).`}
+        meta={
+          <span className="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-0.5 text-[11px] font-semibold text-secondary-foreground">
+            <MapPin aria-hidden="true" className="size-3 text-primary" />
+            {currentAirData.city}
           </span>
-          <span>· Persistent Profile Enabled</span>
-        </div>
-      </div>
+        }
+      />
 
-      {/* Form */}
+      {/* Profile Form */}
       <form
         onSubmit={handleSubmit}
-        className="grid gap-6 border-b border-border pb-8 lg:grid-cols-[0.85fr_1.15fr]"
+        className="grid gap-6 rounded-xl border border-border bg-card p-5 shadow-2xs sm:p-6 lg:grid-cols-[0.8fr_1.2fr]"
       >
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -120,9 +107,17 @@ export function PlannerScreen() {
           </p>
           <h2 className="font-display mt-1 text-xl font-semibold">Customize Your Lifestyle</h2>
           <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-            BreatheWise aligns your physical movement and commuting with pollution peaks so you
-            minimize pulmonary particle intake.
+            BreatheWise aligns your physical movement, commute timing, and household protection with
+            diurnal pollution shifts to minimize particulate inhalation.
           </p>
+          {savedNotice ? (
+            <p
+              role="status"
+              className="mt-4 inline-flex items-center gap-1.5 rounded-lg bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-700 dark:text-emerald-300"
+            >
+              <Check aria-hidden="true" className="size-3.5" /> {savedNotice}
+            </p>
+          ) : null}
         </div>
 
         <div className="grid gap-4 sm:grid-cols-2">
@@ -132,14 +127,14 @@ export function PlannerScreen() {
               value={formState.occupation}
               onChange={(e) => updateField("occupation", e.target.value)}
               placeholder="e.g. Office worker, Field engineer"
-              className="text-sm"
+              className="rounded-lg text-sm"
             />
           </label>
 
           <label className="grid gap-1.5 text-xs font-semibold text-foreground">
             Daily Commute Method
             <Select value={formState.commute} onValueChange={(v) => updateField("commute", v)}>
-              <SelectTrigger aria-label="Daily commute">
+              <SelectTrigger aria-label="Daily commute" className="rounded-lg">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -157,7 +152,7 @@ export function PlannerScreen() {
           <label className="grid gap-1.5 text-xs font-semibold text-foreground">
             Preferred Movement / Exercise
             <Select value={formState.activity} onValueChange={(v) => updateField("activity", v)}>
-              <SelectTrigger aria-label="Preferred movement">
+              <SelectTrigger aria-label="Preferred movement" className="rounded-lg">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -173,7 +168,7 @@ export function PlannerScreen() {
           <label className="grid gap-1.5 text-xs font-semibold text-foreground">
             Household Setting
             <Select value={formState.household} onValueChange={(v) => updateField("household", v)}>
-              <SelectTrigger aria-label="Household setting">
+              <SelectTrigger aria-label="Household setting" className="rounded-lg">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -196,7 +191,7 @@ export function PlannerScreen() {
               value={formState.preference}
               onValueChange={(v) => updateField("preference", v)}
             >
-              <SelectTrigger aria-label="Primary focus">
+              <SelectTrigger aria-label="Primary focus" className="rounded-lg">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -212,7 +207,7 @@ export function PlannerScreen() {
             </Select>
           </label>
 
-          <Button type="submit" className="sm:col-span-2 gap-2" disabled={isGenerating}>
+          <Button type="submit" className="gap-2 rounded-lg sm:col-span-2" disabled={isGenerating}>
             <Check aria-hidden="true" className="size-4" />
             {isGenerating
               ? "Synthesizing Environmental Plan..."
@@ -221,24 +216,46 @@ export function PlannerScreen() {
         </div>
       </form>
 
-      {/* Routine Presentation */}
-      <section aria-labelledby="plan-heading">
-        <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+      {/* Routine Timeline */}
+      <section aria-labelledby="plan-heading" className="space-y-5">
+        <div className="flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-wider text-primary">
               Harmonized Schedule
             </p>
             <h2 id="plan-heading" className="font-display mt-1 text-2xl font-semibold">
-              Today’s Daily Plan for {currentAirData.city}
+              Today&apos;s Daily Plan for {currentAirData.city}
             </h2>
           </div>
-          <span className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Clock3 aria-hidden="true" className="size-4 text-primary" /> Generated{" "}
-            {plan?.generatedAt || "Just now"}
-          </span>
+          <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+            {plan ? (
+              <span className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-[11px] font-medium">
+                <Sparkles aria-hidden="true" className="size-3 text-primary" />
+                {plan.isAiGenerated ? "Gemini AI" : "Scientific Rule Engine"}
+              </span>
+            ) : null}
+            <span className="inline-flex items-center gap-1.5">
+              <Clock3 aria-hidden="true" className="size-3.5 text-primary" />
+              {plan?.generatedAt || "Just now"}
+            </span>
+          </div>
         </div>
 
-        {plan && (
+        {/* Overall Guidance Banner */}
+        {plan?.overallGuidance && !isGenerating ? (
+          <div className="rounded-xl border border-primary/20 bg-secondary/45 px-4 py-3 text-xs leading-relaxed text-foreground">
+            <strong className="font-semibold text-primary">Daily Summary: </strong>
+            {plan.overallGuidance}
+          </div>
+        ) : null}
+
+        {isGenerating ? (
+          <div className="grid gap-5 lg:grid-cols-3">
+            <Skeleton className="h-[290px] rounded-xl" />
+            <Skeleton className="h-[290px] rounded-xl" />
+            <Skeleton className="h-[290px] rounded-xl" />
+          </div>
+        ) : plan ? (
           <div className="grid gap-5 lg:grid-cols-3">
             {plan.moments.map((moment) => {
               const Icon = getMomentIcon(moment.time);
@@ -248,32 +265,45 @@ export function PlannerScreen() {
               return (
                 <article
                   key={moment.time}
-                  className="rounded-xl border border-border bg-card p-5 sm:p-6 shadow-xs flex flex-col justify-between"
+                  className="flex flex-col justify-between rounded-xl border border-border bg-card p-5 shadow-2xs transition-colors hover:border-primary/35 sm:p-6"
                 >
                   <div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-bold uppercase tracking-wider text-primary">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
+                        <Icon aria-hidden="true" className="size-4" />
                         {moment.time}
                       </span>
-                      <Icon aria-hidden="true" className="size-5 text-primary" />
+                      <span className="inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                        {isAvoid ? (
+                          <>
+                            <Home aria-hidden="true" className="size-2.5" /> Indoor Focus
+                          </>
+                        ) : (
+                          "Outdoor / Transit"
+                        )}
+                      </span>
                     </div>
 
                     <h3 className="font-display mt-3 text-lg font-semibold">{moment.title}</h3>
                     <p className="mt-2 text-xs leading-relaxed text-foreground">{moment.action}</p>
 
-                    <div className="mt-4 space-y-2 border-t border-border pt-3 text-[11px]">
-                      {/* Personal Defense */}
-                      <div className="flex items-start gap-1.5 text-muted-foreground">
-                        <ShieldAlert className="size-3.5 text-amber-500 shrink-0 mt-0.5" />
+                    <div className="mt-4 space-y-2.5 border-t border-border pt-3.5 text-[11px]">
+                      <div className="flex items-start gap-2 text-muted-foreground">
+                        <ShieldAlert
+                          aria-hidden="true"
+                          className="mt-0.5 size-3.5 shrink-0 text-amber-500"
+                        />
                         <span>
                           <strong className="text-foreground">Health Defense:</strong>{" "}
                           {moment.personalExposureDefense}
                         </span>
                       </div>
 
-                      {/* Ecological Benefit */}
-                      <div className="flex items-start gap-1.5 text-muted-foreground">
-                        <Leaf className="size-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                      <div className="flex items-start gap-2 text-muted-foreground">
+                        <Leaf
+                          aria-hidden="true"
+                          className="mt-0.5 size-3.5 shrink-0 text-emerald-600 dark:text-emerald-400"
+                        />
                         <span>
                           <strong className="text-foreground">Emissions Impact:</strong>{" "}
                           {moment.ecologicalBenefit}
@@ -282,15 +312,15 @@ export function PlannerScreen() {
                     </div>
                   </div>
 
-                  <div className="mt-5 pt-3 border-t border-border flex items-center justify-between text-[11px]">
-                    <span className="text-muted-foreground">Outdoor Safety:</span>
+                  <div className="mt-5 flex items-center justify-between border-t border-border pt-3 text-[11px]">
+                    <span className="font-medium text-muted-foreground">Outdoor Safety</span>
                     <span
-                      className={`font-semibold px-2 py-0.5 rounded-md ${
+                      className={`rounded-full border px-2.5 py-0.5 font-semibold ${
                         isAvoid
-                          ? "bg-rose-100 text-rose-800 dark:bg-rose-950 dark:text-rose-300"
+                          ? "border-rose-300 bg-rose-50 text-rose-800 dark:border-rose-800 dark:bg-rose-950/60 dark:text-rose-300"
                           : isCaution
-                            ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
-                            : "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+                            ? "border-amber-300 bg-amber-50 text-amber-800 dark:border-amber-800 dark:bg-amber-950/60 dark:text-amber-300"
+                            : "border-emerald-300 bg-emerald-50 text-emerald-800 dark:border-emerald-800 dark:bg-emerald-950/60 dark:text-emerald-300"
                       }`}
                     >
                       {moment.safetyRating}
@@ -300,7 +330,7 @@ export function PlannerScreen() {
               );
             })}
           </div>
-        )}
+        ) : null}
       </section>
     </div>
   );
